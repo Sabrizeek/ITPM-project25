@@ -1,4 +1,4 @@
-const LgUser = require("../Model/RegisterModel");
+const LgUser = require("../models/RegisterModel");
 const bcrypt = require("bcrypt");
 
 // Get all users
