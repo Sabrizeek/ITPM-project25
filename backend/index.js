@@ -1,24 +1,32 @@
-import dotenv from "dotenv";
-dotenv.config(); // Load environment variables before using them
-
 import express from "express";
+import cors from "cors";
+import bodyParser from "body-parser";
+import path from "path";
+import dotenv from "dotenv";
 import { connectDB } from "./config/db.js";
-import cors from "cors"; 
+import contactRoutes from "./routes/contactRoutes.js";
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(express.json());
-app.use(cors({
-    origin: 'http://localhost:3000',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// Get the current directory path for ES modules
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
 
-console.log("Mongo URI:", process.env.MONGO_URI); // Debugging line
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
+app.use("/public", express.static(path.join(__dirname, "public")));
 
-// Start server and connect to the database
+// Connect to MongoDB
+connectDB();
+
+// Routes
+app.use("/api/contacts", contactRoutes);
+
+// Start server
 app.listen(PORT, () => {
-    connectDB(); // Connect to the database
-    console.log(`Server started at http://localhost:${PORT}🔥`);
+    console.log(`Server running on port ${PORT}`);
 });
