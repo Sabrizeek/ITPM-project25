@@ -14,6 +14,8 @@ const CalendarComponent = () => {
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState(null);
   const reminderTimeouts = useRef({});
 
   useEffect(() => {
@@ -81,13 +83,21 @@ const CalendarComponent = () => {
   };
 
   const handleDelete = async (id) => {
+    setEventToDelete(id);
+    setDeleteModalVisible(true);
+    setAgendaVisible(false); // Close the agenda modal to avoid overlap
+  };
+
+  const confirmDelete = async () => {
     try {
-      if (reminderTimeouts.current[id]) {
-        clearTimeout(reminderTimeouts.current[id]);
-        delete reminderTimeouts.current[id];
+      if (reminderTimeouts.current[eventToDelete]) {
+        clearTimeout(reminderTimeouts.current[eventToDelete]);
+        delete reminderTimeouts.current[eventToDelete];
       }
-      await deleteEvent(id);
+      await deleteEvent(eventToDelete);
       loadEvents();
+      setDeleteModalVisible(false);
+      setEventToDelete(null);
     } catch (error) {
       console.error('Error deleting event:', error);
     }
@@ -413,6 +423,72 @@ const CalendarComponent = () => {
             )}
           />
         </Table>
+      </Modal>
+
+      <Modal
+        title={<span style={{ fontSize: '20px', fontWeight: '600', color: '#1a1a1a' }}>Confirm Deletion</span>}
+        visible={deleteModalVisible}
+        onCancel={() => {
+          setDeleteModalVisible(false);
+          setEventToDelete(null);
+        }}
+        footer={[
+          <Button
+            key="cancel"
+            onClick={() => {
+              setDeleteModalVisible(false);
+              setEventToDelete(null);
+            }}
+            style={{
+              borderRadius: '8px',
+              padding: '6px 20px',
+              fontWeight: '500',
+              border: '1px solid #d9d9d9',
+              color: '#595959',
+              transition: 'all 0.3s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#f5f5f5';
+              e.currentTarget.style.borderColor = '#bfbfbf';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = '#fff';
+              e.currentTarget.style.borderColor = '#d9d9d9';
+            }}
+          >
+            Cancel
+          </Button>,
+          <Button
+            key="delete"
+            type="primary"
+            danger
+            onClick={confirmDelete}
+            style={{
+              background: 'linear-gradient(135deg, #ff4d4f, #f5222d)',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '6px 20px',
+              fontWeight: '500',
+              boxShadow: '0 2px 8px rgba(255, 77, 79, 0.3)',
+              transition: 'all 0.3s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 77, 79, 0.5)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(255, 77, 79, 0.3)';
+            }}
+          >
+            Delete
+          </Button>,
+        ]}
+        bodyStyle={{ padding: '24px', background: '#fff', borderRadius: '12px' }}
+        style={{ top: 20, zIndex: 1001 }} // Higher zIndex to ensure it appears on top
+        maskStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.6)' }}
+      >
+        <p style={{ fontSize: '16px', color: '#595959', margin: 0 }}>
+          Are you sure you want to delete this event? This action cannot be undone.
+        </p>
       </Modal>
     </div>
   );
