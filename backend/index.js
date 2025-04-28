@@ -8,9 +8,14 @@ import bcrypt from "bcrypt";
 // Import routes
 import eventRoute from "./routes/eventRoute.js";
 import LgRoutes from "./routes/LgRoute.js";
+import chatRoutes from "./routes/chatRoutes.js";
+import messageRoutes from "./routes/messageRoutes.js";
 
 // Import models
 import LgUser from "./models/RegisterModel.js";
+
+// Error Handling middlewares
+import { notFound, errorHandler } from "./middleware/errorMiddleware.js";
 
 dotenv.config(); // Load environment variables
 
@@ -27,7 +32,13 @@ app.use(cors({
 
 // Routes
 app.use("/api/events", eventRoute); // Use event routes
-app.use("/lguser", LgRoutes);
+app.use("/lguser", LgRoutes); // Use LG user routes
+app.use("/chat", chatRoutes); // Use chat routes
+app.use("/message", messageRoutes); // Use message routes
+
+// Error handling middlewares
+app.use(notFound);
+app.use(errorHandler);
 
 // Debugging
 console.log("Mongo URI:", process.env.MONGO_URI);
