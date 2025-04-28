@@ -15,9 +15,9 @@ import MainContainer from "./ChatApp/MainContainer";
 import ChatArea from "./ChatApp/ChatArea";
 import Users from "./ChatApp/Users";
 
-import CreateEditContact from "./components/CreateEditContact";
-import ContactDetailsModal from "./components/ContactDetailsModal";
-import { createContact, getContacts, updateContact, deleteContact } from "./services/contactApi";
+import CreateEditContact from "./Components/Contact/CreateEditContact";
+import ContactDetailsModal from "./Components/Contact/ContactDetailsModal";
+import { createContact, getContacts, updateContact, deleteContact } from "./Components/services/contactApi";
 import jsPDF from "jspdf";
 import { autoTable } from "jspdf-autotable";
 
