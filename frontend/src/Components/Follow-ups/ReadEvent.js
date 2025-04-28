@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchEvents } from "./api";
+import { fetchEvents } from "../api";
 
 const ReadEvent = () => {
   const [events, setEvents] = useState([]);

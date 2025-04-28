@@ -272,7 +272,7 @@ function App() {
           {/* Redirect unauthenticated users to /login */}
           <Route
             path="/"
-            element={userData ? <Navigate to="/app/mainhome" /> : <Navigate to="/login" />}
+            element={userData ? <Navigate to="/mainhome" /> : <Navigate to="/login" />}
           />
           <Route path="/mainhome" element={<Home />} />
           <Route path="/home2" element={<Admin />} />
