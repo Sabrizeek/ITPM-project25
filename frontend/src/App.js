@@ -1,26 +1,25 @@
 import React, { useState, useEffect } from "react";
+import { Route, Routes } from "react-router-dom";
+import { ConfigProvider, Button, Table, Input, Space, Popconfirm, message, Image, Select } from "antd";
+import { useDispatch, useSelector } from "react-redux";
+import { DeleteFilled, EditFilled, EyeFilled } from "@ant-design/icons";
 import "antd/dist/reset.css";
-import {
-  Button,
-  Table,
-  Input,
-  Space,
-  Popconfirm,
-  message,
-  Image,
-  Select,
-} from "antd";
-import {
-  createContact,
-  getContacts,
-  updateContact,
-  deleteContact,
-} from "./services/contactApi";
+import "./App.css";
+
+import Home from './Components/Home/Home';
+import Register from './Components/Register/Register';
+import Login from './Components/Login/Login';
+import Admin from './Components/Admin/Admin';
+import CalendarComponent from './Components/Follow-ups/Calendar';
+import MainContainer from "./ChatApp/MainContainer";
+import ChatArea from "./ChatApp/ChatArea";
+import Users from "./ChatApp/Users";
+
+import CreateEditContact from "./components/CreateEditContact";
+import ContactDetailsModal from "./components/ContactDetailsModal";
+import { createContact, getContacts, updateContact, deleteContact } from "./services/contactApi";
 import jsPDF from "jspdf";
 import { autoTable } from "jspdf-autotable";
-import CreateEditContact from "./components/CreateEditContact";
-import ContactDetailsModal from "./components/ContactDetailsModal"; 
-import { DeleteFilled, EditFilled, EyeFilled } from "@ant-design/icons";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -28,7 +27,7 @@ const { Option } = Select;
 // ✅ Set backend URL
 const BACKEND_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
-const App = () => {
+const ContactManagement = () => {
   const [contacts, setContacts] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isDetailsModalVisible, setIsDetailsModalVisible] = useState(false);
@@ -132,13 +131,11 @@ const App = () => {
         .includes(searchText.toLowerCase()) &&
       (selectedCategory === "all" || contact.category === selectedCategory)
   );
-  console.log("Contacts:", contacts);
 
   const uniqueCategories = [
     ...new Set(contacts.map((contact) => contact.category)),
   ];
 
-  // ✅ Corrected columns
   const columns = [
     {
       title: "Image",
@@ -262,5 +259,34 @@ const App = () => {
     </div>
   );
 };
+
+function App() {
+  const dispatch = useDispatch();
+  const lightTheme = useSelector((state) => state.themeKey);
+
+  return (
+    <ConfigProvider theme={{ token: { colorPrimary: '#00b96b' } }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }} className={"App" + (lightTheme ? "" : "-dark")}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/mainhome" element={<Home />} />
+          <Route path="/home2" element={<Admin />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/calendar" element={<CalendarComponent />} />
+          <Route path="/contacts" element={<ContactManagement />} />
+
+          {/* Chat routes */}
+          <Route path="app" element={<MainContainer />}>
+            <Route path="welcome" element={<Users />} />
+            <Route path="chat/:_id" element={<ChatArea />} />
+          </Route>
+
+          <Route path="*" element={<div>404: Page Not Found</div>} />
+        </Routes>
+      </div>
+    </ConfigProvider>
+  );
+}
 
 export default App;
