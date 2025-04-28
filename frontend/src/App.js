@@ -1,16 +1,18 @@
+import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import './App.css';
-import React from 'react';
+import { ConfigProvider } from 'antd';
 
 import Home from './Components/Home/Home';
 import Register from './Components/Register/Register';
 import Login from './Components/Login/Login';
 import Admin from './Components/Admin/Admin';
+import CalendarComponent from './components/Calendar';
 
 function App() {
   return (
-    <div>
-      <React.Fragment>
+    <ConfigProvider theme={{ token: { colorPrimary: '#00b96b' } }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/mainhome" element={<Home />} />
@@ -18,8 +20,9 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
         </Routes>
-      </React.Fragment>
-    </div>
+        <CalendarComponent />
+      </div>
+    </ConfigProvider>
   );
 }
 

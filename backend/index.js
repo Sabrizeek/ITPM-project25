@@ -1,12 +1,16 @@
 import express from "express";
-import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
+import { connectDB } from "./config/db.js";
+import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
-import { connectDB } from "./config/db.js"; // You probably need this OR keep your own connect function
-import LgUser from "./models/RegisterModel.js";
+// Import routes
+import eventRoute from "./routes/eventRoute.js";
 import LgRoutes from "./routes/LgRoute.js";
+
+// Import models
+import LgUser from "./models/RegisterModel.js";
 
 dotenv.config(); // Load environment variables
 
@@ -22,6 +26,7 @@ app.use(cors({
 }));
 
 // Routes
+app.use("/api/events", eventRoute); // Use event routes
 app.use("/lguser", LgRoutes);
 
 // Debugging
@@ -37,12 +42,6 @@ const connectDatabase = async () => {
     process.exit(1);
   }
 };
-
-// Start server and connect to the database
-app.listen(PORT, () => {
-  connectDatabase(); // (or use connectDB() if you import from another file)
-  console.log(`Server running at http://localhost:${PORT} 🚀`);
-});
 
 // Register route
 const saltRounds = 10;
@@ -95,4 +94,10 @@ app.post("/login", async (req, res) => {
     console.error(error);
     res.status(500).json({ status: "error", message: "Something went wrong", error });
   }
+});
+
+// Start server and connect to the database
+app.listen(PORT, () => {
+  connectDatabase(); // Connect to MongoDB
+  console.log(`Server running at http://localhost:${PORT} 🚀`);
 });
