@@ -4,6 +4,7 @@ import moment from 'moment-timezone';
 import { fetchEvents, deleteEvent, updateEvent } from '../api';
 import AddEvent from './AddEvent';
 import UpdateEvent from './UpdateEvent';
+import Nav from '../Nav/NavHome'; // Your existing Nav
 
 const { Search } = Input;
 
@@ -160,6 +161,7 @@ const CalendarComponent = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
         {dayEvents.map(event => (
           <div
+           
             key={event._id}
             style={{
               background: 'linear-gradient(135deg, #6b48ff, #00ddeb)',
