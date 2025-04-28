@@ -8,16 +8,16 @@ import {
   deleteChat,
   deleteGroup,
 } from "../controllers/chatController.js";
-import { protect } from "../middleware/authmiddleware.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.route("/").post(protect, accessChat);
-router.route("/").get(protect, fetchChats);
-router.route("/createGroup").post(protect, createGroupChat);
-router.route("/fetchGroups").get(protect, fetchGroups);
-router.route("/groupExit").put(protect, groupExit);
-router.route("/:chatId").delete(protect, deleteChat);
-router.route("/deleteGroup/:chatId").delete(protect, deleteGroup);
+router.route("/").post(authMiddleware, accessChat);
+router.route("/").get(authMiddleware, fetchChats);
+router.route("/createGroup").post(authMiddleware, createGroupChat);
+router.route("/fetchGroups").get(authMiddleware, fetchGroups);
+router.route("/groupExit").put(authMiddleware, groupExit);
+router.route("/:chatId").delete(authMiddleware, deleteChat);
+router.route("/deleteGroup/:chatId").delete(authMiddleware, deleteGroup);
 
 export default router;

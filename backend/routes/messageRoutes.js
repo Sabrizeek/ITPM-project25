@@ -7,15 +7,15 @@ import {
   deleteMessage,
   getEmotionSummary,
 } from "../controllers/messageController.js"; // Changed to singular
-import { protect } from "../middleware/authmiddleware.js";
+import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.route("/:chatId").get(protect, allMessages);
-router.route("/").post(protect, sendMessage);
-router.route("/:messageId").put(protect, updateMessage);
-router.route("/delete/:chatId").delete(protect, deleteMessages);
-router.route("/:messageId").delete(protect, deleteMessage);
-router.route("/summary/:chatId").get(protect, getEmotionSummary);
+router.route("/:chatId").get(authMiddleware, allMessages);
+router.route("/").post(authMiddleware, sendMessage);
+router.route("/:messageId").put(authMiddleware, updateMessage);
+router.route("/delete/:chatId").delete(authMiddleware, deleteMessages);
+router.route("/:messageId").delete(authMiddleware, deleteMessage);
+router.route("/summary/:chatId").get(authMiddleware, getEmotionSummary);
 
 export default router;

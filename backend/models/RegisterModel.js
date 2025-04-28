@@ -9,6 +9,7 @@ const registerSchema = new Schema({
   lggmail: {
     type: String,
     required: true,
+    unique: true, // Prevent duplicate emails
   },
   lgnumber: {
     type: Number,
@@ -27,5 +28,8 @@ const registerSchema = new Schema({
     required: true,
   },
 });
+
+// Add index for faster queries
+registerSchema.index({ lggmail: 1 });
 
 export default mongoose.model("RegisterModel", registerSchema);
