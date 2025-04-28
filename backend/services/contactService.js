@@ -1,138 +1,118 @@
-import Contact from "../models/Contact.js";
+// ADD THIS at the top of contactService.js
 import multer from "multer";
 import path from "path";
-import fs from "fs";
-import { ensureUploadDir } from "../utils/utils.js";
 
-// Ensure the upload directory exists using absolute path relative to backend
-const __dirname = path.dirname(new URL(import.meta.url).pathname).replace(/^\/([A-Z]:)/, '$1'); // Remove leading slash on Windows
-const uploadDir = path.join(__dirname, "..", "public", "uploads");
-console.log("UploadDir:", uploadDir); // Debugging
-ensureUploadDir(uploadDir);
-
-// Multer configuration
+// Setup multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, uploadDir);
+    cb(null, "backend/public/uploads"); // Upload folder
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
-  },
+    const uniqueSuffix = Date.now() + path.extname(file.originalname);
+    cb(null, uniqueSuffix);
+  }
 });
 
-const upload = multer({
-  storage: storage,
-  limits: {
-    fileSize: 10 * 1024 * 1024, // 10 MB file size limit
-  },
-}).single("image"); // Ensure the field name is 'image'
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image/")) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only image files are allowed!"), false);
+  }
+};
 
-// Create a new contact
-const createContact = async (req, res) => {
-  return new Promise((resolve, reject) => {
-    upload(req, res, async (err) => {
-      if (err) {
-        console.error("Multer error:", err);
-        return reject(err);
-      }
+const upload = multer({ storage, fileFilter }); // ✅ Here is your upload
 
-      try {
-        const contactData = req.body;
+// Export it
+export { upload };
 
-        // Check if a file was uploaded
-        if (req.file) {
-          // Save the relative path to the image
-          contactData.imageUrl = `/uploads/${req.file.filename}`;
-          console.log("File uploaded successfully:", contactData.imageUrl);
-        }
+// THEN your normal imports
+import Contact from "../models/Contact.js";
 
-        // Create the contact
-        const contact = new Contact(contactData);
-        await contact.save();
+// Create a contact
+export const createContact = async (req, res) => {
+  try {
+    const {
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      birthday,
+      address,
+      notes,
+      gender,
+      category,
+    } = req.body;
 
-        resolve(contact);
-      } catch (error) {
-        console.error("Error creating contact:", error);
-        reject(error);
-      }
+    let imageUrl = "";
+    if (req.file) {
+      imageUrl = `/uploads/${req.file.filename}`;
+    }
+
+    const contact = new Contact({
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      birthday,
+      address,
+      notes,
+      gender,
+      category,
+      imageUrl,
     });
-  });
+
+    const savedContact = await contact.save();
+    return savedContact;
+  } catch (error) {
+    console.error("Error in createContact:", error);
+    throw error;
+  }
 };
 
 // Get all contacts
-const getContacts = async () => {
+export const getContacts = async () => {
   try {
-    return await Contact.find();
+    const contacts = await Contact.find();
+    return contacts;
   } catch (error) {
-    console.error("Error fetching contacts:", error);
+    console.error("Error in getContacts:", error);
     throw error;
   }
 };
 
 // Get a contact by ID
-const getContactById = async (id) => {
+export const getContactById = async (id) => {
   try {
     const contact = await Contact.findById(id);
-    if (!contact) {
-      throw new Error("Contact not found");
-    }
     return contact;
   } catch (error) {
-    console.error("Error fetching contact by ID:", error);
+    console.error("Error in getContactById:", error);
     throw error;
   }
 };
 
-// Update a contact by ID (including image)
-const updateContact = async (req, res) => {
-  return new Promise((resolve, reject) => {
-    upload(req, res, async (err) => {
-      if (err) {
-        console.error("Multer error:", err);
-        return reject(err);
-      }
-
-      try {
-        const { id } = req.params;
-        const contactData = req.body;
-
-        // Check if a file was uploaded
-        if (req.file) {
-          // Save the relative path to the image
-          contactData.imageUrl = `/uploads/${req.file.filename}`;
-          console.log("File uploaded successfully:", contactData.imageUrl);
-        }
-
-        // Find the contact and update it
-        const contact = await Contact.findByIdAndUpdate(id, contactData, {
-          new: true,
-        });
-        
-        if (!contact) {
-          return reject(new Error("Contact not found"));
-        }
-
-        resolve(contact);
-      } catch (error) {
-        console.error("Error updating contact:", error);
-        reject(error);
-      }
-    });
-  });
-};
-
-// Delete a contact by ID
-const deleteContact = async (id) => {
+// Update a contact
+export const updateContact = async (id, contactData) => {
   try {
-    const contact = await Contact.findByIdAndDelete(id);
-    if (!contact) {
-      throw new Error("Contact not found");
-    }
-    return contact;
+    const updatedContact = await Contact.findByIdAndUpdate(id, contactData, {
+      new: true,
+      runValidators: true,
+    });
+    return updatedContact;
   } catch (error) {
-    console.error("Error deleting contact:", error);
+    console.error("Error in updateContact:", error);
     throw error;
   }
 };
 
-export { createContact, getContacts, getContactById, updateContact, deleteContact };
+// Delete a contact
+export const deleteContact = async (id) => {
+  try {
+    const deletedContact = await Contact.findByIdAndDelete(id);
+    return deletedContact;
+  } catch (error) {
+    console.error("Error in deleteContact:", error);
+    throw error;
+  }
+};
