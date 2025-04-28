@@ -16,11 +16,11 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-import userRoutes from "./routes/userRoutes.js";
+
 import chatRoutes from "./routes/chatRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
 
-app.use("/user", userRoutes);
+
 app.use("/chat", chatRoutes);
 app.use("/message", messageRoutes);
 

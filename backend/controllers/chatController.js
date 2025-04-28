@@ -1,6 +1,6 @@
 import asyncHandler from 'express-async-handler';
 import Chat from '../models/chatModel.js';
-import User from '../models/userModel.js';
+
 import Message from '../models/messageModel.js';
 
 
