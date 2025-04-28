@@ -1,8 +1,11 @@
+// backend/index.js
+
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import path from "path";
 import dotenv from "dotenv";
+import { fileURLToPath } from "url"; // ✅ Needed for __dirname in ES modules
 import { connectDB } from "./config/db.js";
 import contactRoutes from "./routes/contactRoutes.js";
 
@@ -12,13 +15,16 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Get the current directory path for ES modules
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+// Correct __dirname handling for ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
-app.use("/public", express.static(path.join(__dirname, "public")));
+
+// ✅ Serve uploads statically
+app.use("/uploads", express.static(path.join(__dirname, "public/uploads")));
 
 // Connect to MongoDB
 connectDB();
