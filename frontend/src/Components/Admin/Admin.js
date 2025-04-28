@@ -24,7 +24,7 @@ const Admin = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/lguser/allusers');
+      const response = await axios.get('http://localhost:5000/lguser/allusers');
       setUsers(response.data.users);
       setError(null);
     } catch (err) {
@@ -35,7 +35,7 @@ const Admin = () => {
 
   const handleUpdateUser = async (userId) => {
     try {
-      await axios.put(`http://localhost:4000/lguser/updateuser/${userId}`, userDetails);
+      await axios.put(`http://localhost:5000/lguser/updateuser/${userId}`, userDetails);
       setUserToUpdate(null);
       setUserDetails({ lgname: '', lggmail: '', lgage: '', lgnumber: '', lgaddress: '' });
       fetchUsers();
@@ -48,7 +48,7 @@ const Admin = () => {
 
   const handleDeleteUser = async (userId) => {
     try {
-      await axios.delete(`http://localhost:4000/lguser/deleteuser/${userId}`);
+      await axios.delete(`http://localhost:5000/lguser/deleteuser/${userId}`);
       fetchUsers();
       setDeleteConfirmation(null);
       setDeleteSuccess(true);

@@ -68,7 +68,7 @@ function Register() {
     }
 
     try {
-      await axios.post("http://localhost:4000/register", {
+      await axios.post("http://localhost:5000/register", {
         lgname: user.lgname,
         lggmail: user.lggmail,
         lgnumber: user.lgnumber,
