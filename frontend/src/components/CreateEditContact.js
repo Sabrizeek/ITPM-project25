@@ -18,8 +18,8 @@ import { getContacts } from "../services/contactApi";
 
 const { Option } = Select;
 
-// Base URL for the backend
-const BACKEND_URL = "http://localhost:5000";
+// Use environment variable for backend URL
+const BACKEND_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const CreateEditContact = ({ open, onClose, onSubmit, initialValues }) => {
   const [form] = Form.useForm();
@@ -50,7 +50,7 @@ const CreateEditContact = ({ open, onClose, onSubmit, initialValues }) => {
       });
 
       if (initialValues?.imageUrl) {
-        const imageUrl = `${BACKEND_URL}/public${initialValues.imageUrl}`;
+        const imageUrl = `${BACKEND_URL}${initialValues.imageUrl}`; // Correct URL
         console.log("CreateEditContact Image URL:", imageUrl); // Debugging
         setFileList([
           {
