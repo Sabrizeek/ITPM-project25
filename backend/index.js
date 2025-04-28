@@ -3,40 +3,44 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 import bcrypt from "bcrypt";
+
+import { connectDB } from "./config/db.js"; // You probably need this OR keep your own connect function
 import LgUser from "./models/RegisterModel.js";
 import LgRoutes from "./routes/LgRoute.js";
 
-dotenv.config(); // Load .env file
+dotenv.config(); // Load environment variables
+
 const app = express();
+const PORT = process.env.PORT || 4000;
 
 // Middleware
 app.use(express.json());
 app.use(cors({
-  origin: '*', // Allow all origins for now
+  origin: '*', // Allow all origins for now (You can later specify frontend URL)
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Routes
 app.use("/lguser", LgRoutes);
 
-// Environment variables
-const PORT = process.env.PORT || 4000;
-const MONGO_URI = process.env.MONGO_URI;
+// Debugging
+console.log("Mongo URI:", process.env.MONGO_URI);
 
 // Connect to MongoDB
-const connectDB = async () => {
+const connectDatabase = async () => {
   try {
-    const conn = await mongoose.connect(MONGO_URI);
-    console.log(`MongoDB Connected 😍: ${conn.connection.host}`);
+    const conn = await mongoose.connect(process.env.MONGO_URI);
+    console.log(`MongoDB Connected: ${conn.connection.host} 🔥`);
   } catch (error) {
     console.error(`MongoDB connection error: ${error.message}`);
     process.exit(1);
   }
 };
 
-// Start server after connecting DB
+// Start server and connect to the database
 app.listen(PORT, () => {
-  connectDB();
+  connectDatabase(); // (or use connectDB() if you import from another file)
   console.log(`Server running at http://localhost:${PORT} 🚀`);
 });
 
