@@ -25,6 +25,9 @@ import { DeleteFilled, EditFilled, EyeFilled } from "@ant-design/icons";
 const { Search } = Input;
 const { Option } = Select;
 
+// ✅ Set backend URL
+const BACKEND_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
 const App = () => {
   const [contacts, setContacts] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -32,7 +35,7 @@ const App = () => {
   const [editingContact, setEditingContact] = useState(null);
   const [selectedContact, setSelectedContact] = useState(null);
   const [searchText, setSearchText] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all"); // Default to "all" instead of empty string
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   useEffect(() => {
     fetchContacts();
@@ -122,7 +125,6 @@ const App = () => {
     doc.save("contacts.pdf");
   };
 
-  // Filter contacts based on search text and selected category
   const filteredContacts = contacts.filter(
     (contact) =>
       `${contact.firstName} ${contact.lastName}`
@@ -130,24 +132,31 @@ const App = () => {
         .includes(searchText.toLowerCase()) &&
       (selectedCategory === "all" || contact.category === selectedCategory)
   );
+  console.log("Contacts:", contacts);
 
   const uniqueCategories = [
     ...new Set(contacts.map((contact) => contact.category)),
   ];
 
+  // ✅ Corrected columns
   const columns = [
     {
       title: "Image",
       dataIndex: "imageUrl",
       key: "imageUrl",
       render: (imageUrl) => (
-        <Image
-          width={75}
-          style={{ borderRadius: "50%" }}
-          height={75}
-          src={`http://localhost:5000/public/${imageUrl}`}
-          alt={imageUrl}
-        />
+        imageUrl ? (
+          <Image
+            width={75}
+            height={75}
+            style={{ borderRadius: "50%", objectFit: "cover" }}
+            src={`${BACKEND_URL}${imageUrl}`}
+            alt="Contact"
+            fallback="https://via.placeholder.com/75?text=No+Image"
+          />
+        ) : (
+          <span>No Image</span>
+        )
       ),
     },
     {
@@ -209,7 +218,7 @@ const App = () => {
   return (
     <div style={{ padding: "20px" }}>
       <h1>Contact Management</h1>
-      <Space style={{ marginBottom: 16 }}>
+      <Space style={{ marginBottom: 16 }} wrap>
         <Button type="primary" onClick={() => showModal()}>
           Create Contact
         </Button>
