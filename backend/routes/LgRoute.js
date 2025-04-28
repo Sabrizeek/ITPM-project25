@@ -1,13 +1,10 @@
-const express = require("express");
+import express from "express";
+import { getAllUsers, updateUser, deleteUser } from "../controllers/LgController.js";
+
 const router = express.Router();
-const { getAllUsers, updateUser, deleteUser } = require("../Controller/LgController");
-
-
 
 router.get("/allusers", getAllUsers);
 router.put("/updateuser/:id", updateUser);
-
 router.delete("/deleteuser/:id", deleteUser);
 
-
-module.exports = router;
+export default router;

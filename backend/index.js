@@ -15,7 +15,7 @@ import LgUser from "./models/RegisterModel.js";
 dotenv.config(); // Load environment variables
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(express.json());

@@ -19,7 +19,7 @@ function Nav() {
         
         <li><Link to="/profile" className="nav-link">Contacts</Link></li>
         <li><Link to="/dashboard" className="nav-link">Live chats</Link></li>
-        <li><Link to="/settings" className="nav-link">Follow-Ups</Link></li>
+        <li><Link to="/Calendar" className="nav-link">Follow-Ups</Link></li>
         <li>
           <button onClick={handleLogout} className="logout-button">Logout</button>
         </li>

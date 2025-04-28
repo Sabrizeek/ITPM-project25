@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+import mongoose from "mongoose";
+const { Schema } = mongoose;
 
 const registerSchema = new Schema({
   lgname: {
@@ -28,4 +28,4 @@ const registerSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model("RegisterModel", registerSchema);
+export default mongoose.model("RegisterModel", registerSchema);

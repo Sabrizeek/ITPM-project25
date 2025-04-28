@@ -7,7 +7,7 @@ import Home from './Components/Home/Home';
 import Register from './Components/Register/Register';
 import Login from './Components/Login/Login';
 import Admin from './Components/Admin/Admin';
-import CalendarComponent from './components/Calendar';
+import CalendarComponent from './Components/Follow-ups/Calendar';
 
 function App() {
   return (
@@ -19,8 +19,9 @@ function App() {
           <Route path="/home2" element={<Admin />} />
           <Route path="/register" element={<Register />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/calendar" element={<CalendarComponent />} />
+          <Route path="*" element={<div>404: Page Not Found</div>} />
         </Routes>
-        <CalendarComponent />
       </div>
     </ConfigProvider>
   );
