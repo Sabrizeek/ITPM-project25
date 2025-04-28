@@ -1,12 +1,17 @@
 import LgUser from "../models/RegisterModel.js";
-import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { addUserToGeneralChat } from "./chatController.js";
 
 // Register a new user
 const registerUser = async (req, res) => {
   const { lgname, lggmail, lgnumber, lgage, lgaddress, password } = req.body;
 
   try {
+    // Validate input
+    if (!lgname || !lggmail || !lgnumber || !lgage || !lgaddress || !password) {
+      return res.status(400).json({ status: "error", error: "All fields are required" });
+    }
+
     // Validate email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(lggmail)) {
@@ -23,11 +28,9 @@ const registerUser = async (req, res) => {
     if (!/^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{9,}$/.test(password)) {
       return res.status(400).json({
         status: "error",
-        error: "Password must be at least 9 characters with numbers and special characters",
+        error: "Password must be at least 9 characters long and contain numbers and special characters",
       });
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new LgUser({
       lgname,
@@ -35,11 +38,31 @@ const registerUser = async (req, res) => {
       lgnumber,
       lgage,
       lgaddress,
-      password: hashedPassword,
+      password, // Password will be hashed by pre-save hook
     });
 
     await newUser.save();
-    res.status(201).json({ status: "ok", message: "User registered successfully" });
+
+    // Add user to General chat
+    const generalChatId = await addUserToGeneralChat(newUser._id, newUser.lgname);
+
+    // Update user's chats array
+    newUser.chats.push(generalChatId);
+    await newUser.save();
+
+    // Generate JWT
+    const token = jwt.sign(
+      { userId: newUser._id, lggmail: newUser.lggmail, lgname: newUser.lgname, isAdmin: newUser.lggmail === "admin@gmail.com" },
+      process.env.JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.status(201).json({
+      status: "ok",
+      message: "User registered successfully and added to General chat",
+      token,
+      user: { id: newUser._id, lgname: newUser.lgname, lggmail: newUser.lggmail },
+    });
   } catch (err) {
     console.error("Registration error:", err);
     res.status(500).json({ status: "error", error: "Server error" });
@@ -61,14 +84,21 @@ const loginUser = async (req, res) => {
       return res.status(404).json({ status: "error", error: "Email not found" });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await user.matchPassword(password);
     if (!isPasswordValid) {
       return res.status(401).json({ status: "error", error: "Incorrect password" });
     }
 
+    // Add user to General chat if not already added
+    const generalChatId = await addUserToGeneralChat(user._id, user.lgname);
+    if (!user.chats.includes(generalChatId)) {
+      user.chats.push(generalChatId);
+      await user.save();
+    }
+
     // Generate JWT
     const token = jwt.sign(
-      { userId: user._id, lggmail: user.lggmail, isAdmin: user.lggmail === "admin@gmail.com" },
+      { userId: user._id, lggmail: user.lggmail, lgname: user.lgname, isAdmin: user.lggmail === "admin@gmail.com" },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -78,6 +108,7 @@ const loginUser = async (req, res) => {
       message: "Login successful",
       token,
       redirectTo: user.lggmail === "admin@gmail.com" ? "/home2" : "/mainhome",
+      user: { id: user._id, lgname: user.lgname, lggmail: user.lggmail },
     });
   } catch (err) {
     console.error("Login error:", err);
@@ -88,7 +119,7 @@ const loginUser = async (req, res) => {
 // Get all users
 const getAllUsers = async (req, res) => {
   try {
-    const users = await LgUser.find().select("-password"); // Exclude password
+    const users = await LgUser.find().select("-password");
     res.json({ status: "ok", users });
   } catch (err) {
     console.error("Get users error:", err);
@@ -108,10 +139,10 @@ const updateUser = async (req, res) => {
       if (!/^(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{9,}$/.test(password)) {
         return res.status(400).json({
           status: "error",
-          error: "Password must be at least 9 characters with numbers and special characters",
+          error: "Password must be at least 9 characters long and contain numbers and special characters",
         });
       }
-      updateData.password = await bcrypt.hash(password, 10);
+      updateData.password = password; // Will be hashed by pre-save hook
     }
 
     const updatedUser = await LgUser.findByIdAndUpdate(id, updateData, { new: true }).select("-password");

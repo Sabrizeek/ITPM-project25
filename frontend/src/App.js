@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, Navigate } from "react-router-dom";
 import { ConfigProvider, Button, Table, Input, Space, Popconfirm, message, Image, Select } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { DeleteFilled, EditFilled, EyeFilled } from "@ant-design/icons";
@@ -13,7 +13,7 @@ import Admin from './Components/Admin/Admin';
 import CalendarComponent from './Components/Follow-ups/Calendar';
 import MainContainer from "./ChatApp/MainContainer";
 import ChatArea from "./ChatApp/ChatArea";
-import Users from "./ChatApp/Users";
+import Users from "./ChatApp/Users"; // Removed Welcome.js import
 
 import CreateEditContact from "./Components/Contact/CreateEditContact";
 import ContactDetailsModal from "./Components/Contact/ContactDetailsModal";
@@ -24,7 +24,7 @@ import { autoTable } from "jspdf-autotable";
 const { Search } = Input;
 const { Option } = Select;
 
-// ✅ Set backend URL
+// Set backend URL
 const BACKEND_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const ContactManagement = () => {
@@ -263,12 +263,17 @@ const ContactManagement = () => {
 function App() {
   const dispatch = useDispatch();
   const lightTheme = useSelector((state) => state.themeKey);
+  const userData = JSON.parse(localStorage.getItem("userData"));
 
   return (
     <ConfigProvider theme={{ token: { colorPrimary: '#00b96b' } }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }} className={"App" + (lightTheme ? "" : "-dark")}>
         <Routes>
-          <Route path="/" element={<Home />} />
+          {/* Redirect unauthenticated users to /login */}
+          <Route
+            path="/"
+            element={userData ? <Navigate to="/app/mainhome" /> : <Navigate to="/login" />}
+          />
           <Route path="/mainhome" element={<Home />} />
           <Route path="/home2" element={<Admin />} />
           <Route path="/register" element={<Register />} />
@@ -277,8 +282,8 @@ function App() {
           <Route path="/contacts" element={<ContactManagement />} />
 
           {/* Chat routes */}
-          <Route path="app" element={<MainContainer />}>
-            <Route path="welcome" element={<Users />} />
+          <Route path="/app" element={<MainContainer />}>
+            <Route path="mainhome" element={<Users />} />
             <Route path="chat/:_id" element={<ChatArea />} />
           </Route>
 

@@ -1,9 +1,39 @@
 import asyncHandler from 'express-async-handler';
 import Chat from '../models/chatModel.js';
-
 import Message from '../models/messageModel.js';
+import LgUser from '../models/RegisterModel.js';
 
+// Helper function to add a user to the "General" group chat
+const addUserToGeneralChat = asyncHandler(async (userId, lgname) => {
+  let generalChat = await Chat.findOne({ chatName: "General", isGroupChat: true });
+  if (!generalChat) {
+    const adminUser = await LgUser.findById(userId);
+    generalChat = await Chat.create({
+      chatName: "General",
+      isGroupChat: true,
+      users: [userId],
+      groupAdmin: userId,
+    });
+    await Message.create({
+      sender: userId,
+      content: `Welcome to the General chat!`,
+      chat: generalChat._id,
+      emotion: "Happy",
+    });
+  } else if (!generalChat.users.includes(userId)) {
+    generalChat.users.push(userId);
+    await generalChat.save();
+    await Message.create({
+      sender: userId,
+      content: `${lgname} has joined the General chat!`,
+      chat: generalChat._id,
+      emotion: "Happy",
+    });
+  }
+  return generalChat._id;
+});
 
+// Access or create a 1:1 chat
 const accessChat = asyncHandler(async (req, res) => {
   const { userId } = req.body;
 
@@ -15,16 +45,16 @@ const accessChat = asyncHandler(async (req, res) => {
   let isChat = await Chat.find({
     isGroupChat: false,
     $and: [
-      { users: { $elemMatch: { $eq: req.user._id } } },
+      { users: { $elemMatch: { $eq: req.user.userId } } }, // Updated to userId
       { users: { $elemMatch: { $eq: userId } } },
     ],
   })
     .populate('users', '-password')
     .populate('latestMessage');
 
-  isChat = await User.populate(isChat, {
+  isChat = await LgUser.populate(isChat, {
     path: 'latestMessage.sender',
-    select: 'name email',
+    select: 'lgname lggmail',
   });
 
   if (isChat.length > 0) {
@@ -33,16 +63,16 @@ const accessChat = asyncHandler(async (req, res) => {
     const chatData = {
       chatName: 'sender',
       isGroupChat: false,
-      users: [req.user._id, userId],
+      users: [req.user.userId, userId], // Updated to userId
     };
 
     try {
       const createdChat = await Chat.create(chatData);
-      const FullChat = await Chat.findOne({ _id: createdChat._id }).populate(
+      const fullChat = await Chat.findOne({ _id: createdChat._id }).populate(
         'users',
         '-password'
       );
-      res.status(200).json(FullChat);
+      res.status(200).json(fullChat);
     } catch (error) {
       res.status(400);
       throw new Error(error.message);
@@ -50,20 +80,18 @@ const accessChat = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Fetch all chats for a user
-// @route   GET /api/chat
-// @access  Protected
+// Fetch all chats for a user
 const fetchChats = asyncHandler(async (req, res) => {
   try {
-    Chat.find({ users: { $elemMatch: { $eq: req.user._id } } })
+    Chat.find({ users: { $elemMatch: { $eq: req.user.userId } } }) // Updated to userId
       .populate('users', '-password')
       .populate('groupAdmin', '-password')
       .populate('latestMessage')
       .sort({ updatedAt: -1 })
       .then(async (results) => {
-        results = await User.populate(results, {
+        results = await LgUser.populate(results, {
           path: 'latestMessage.sender',
-          select: 'name email',
+          select: 'lgname lggmail',
         });
         res.status(200).send(results);
       });
@@ -73,9 +101,7 @@ const fetchChats = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Fetch all groups
-// @route   GET /api/chat/groups
-// @access  Protected
+// Fetch all groups
 const fetchGroups = asyncHandler(async (req, res) => {
   try {
     const allGroups = await Chat.where('isGroupChat')
@@ -89,23 +115,21 @@ const fetchGroups = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Create new group chat
-// @route   POST /api/chat/group
-// @access  Protected
+// Create new group chat
 const createGroupChat = asyncHandler(async (req, res) => {
   if (!req.body.users || !req.body.name) {
     return res.status(400).send({ message: 'Data is insufficient' });
   }
 
   const users = JSON.parse(req.body.users);
-  users.push(req.user);
+  users.push(req.user.userId); // Updated to userId
 
   try {
     const groupChat = await Chat.create({
       chatName: req.body.name,
       users: users,
       isGroupChat: true,
-      groupAdmin: req.user,
+      groupAdmin: req.user.userId, // Updated to userId
     });
 
     const fullGroupChat = await Chat.findOne({ _id: groupChat._id })
@@ -119,9 +143,7 @@ const createGroupChat = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Exit from group
-// @route   PUT /api/chat/group-exit
-// @access  Protected
+// Exit from group
 const groupExit = asyncHandler(async (req, res) => {
   const { chatId, userId } = req.body;
 
@@ -141,9 +163,7 @@ const groupExit = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Delete 1:1 chat
-// @route   DELETE /api/chat/:chatId
-// @access  Protected
+// Delete 1:1 chat
 const deleteChat = asyncHandler(async (req, res) => {
   const { chatId } = req.params;
 
@@ -164,9 +184,7 @@ const deleteChat = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Delete group chat
-// @route   DELETE /api/chat/group/:chatId
-// @access  Protected
+// Delete group chat
 const deleteGroup = asyncHandler(async (req, res) => {
   const { chatId } = req.params;
 
@@ -177,8 +195,7 @@ const deleteGroup = asyncHandler(async (req, res) => {
       throw new Error('Group not found');
     }
 
-    // Check if the requester is the group admin
-    if (group.groupAdmin.toString() !== req.user._id.toString()) {
+    if (group.groupAdmin.toString() !== req.user.userId.toString()) { // Updated to userId
       res.status(403);
       throw new Error('Only the group admin can delete this group');
     }
@@ -201,4 +218,5 @@ export {
   groupExit,
   deleteChat,
   deleteGroup,
+  addUserToGeneralChat,
 };

@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import "./Login.css";
 import { useNavigate } from "react-router-dom";
-// import axios from "axios";
 import Nav from "../Nav/NavLogin";
-import axios from "../../api/axios"; // Adjust path as needed
+import axios from "axios"; // Use direct axios import
 
 function Login() {
   const navigate = useNavigate();
@@ -16,24 +15,26 @@ function Login() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUser((prevUser) => ({ ...prevUser, [name]: value }));
-    setError(""); // Clear error on input change
+    setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Sending data to backend:", user);
-
     try {
       const res = await axios.post("http://localhost:5000/api/auth/login", user);
-      console.log("Backend response:", res.data);
-
       if (res.data.status === "ok") {
-        // Store JWT token
-        localStorage.setItem("token", res.data.token);
+        // Store user data in localStorage
+        localStorage.setItem(
+          "userData",
+          JSON.stringify({
+            _id: res.data.user.id,
+            lgname: res.data.user.lgname,
+            lggmail: res.data.user.lggmail,
+            token: res.data.token,
+          })
+        );
         alert("Login Successful");
-
-        // Redirect based on backend response
-        navigate(res.data.redirectTo);
+        navigate("/mainhome"); // Navigate to chat interface
       } else {
         setError(res.data.error || "Invalid Credentials");
       }

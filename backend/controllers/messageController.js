@@ -1,7 +1,7 @@
 import expressAsyncHandler from "express-async-handler";
 import Message from "../models/messageModel.js";
-
 import Chat from "../models/chatModel.js";
+import LgUser from "../models/RegisterModel.js"; // Changed from User to LgUser
 import natural from "natural";
 
 // Simple emotion detection based on word matching
@@ -36,8 +36,8 @@ const detectEmotion = (content) => {
 export const allMessages = expressAsyncHandler(async (req, res) => {
   try {
     const messages = await Message.find({ chat: req.params.chatId })
-      .populate("sender", "name email")
-      .populate("reciever")
+      .populate("sender", "lgname lggmail") // Updated fields
+      .populate("receiver") // Fixed typo
       .populate("chat");
     res.json(messages);
   } catch (error) {
@@ -57,7 +57,7 @@ export const sendMessage = expressAsyncHandler(async (req, res) => {
   const emotion = detectEmotion(content);
 
   const newMessage = {
-    sender: req.user._id,
+    sender: req.user.userId, // Updated to use userId from JWT
     content: content,
     chat: chatId,
     emotion: emotion,
@@ -66,12 +66,12 @@ export const sendMessage = expressAsyncHandler(async (req, res) => {
   try {
     let message = await Message.create(newMessage);
 
-    message = await message.populate("sender", "name pic");
+    message = await message.populate("sender", "lgname lggmail"); // Updated fields
     message = await message.populate("chat");
-    message = await message.populate("reciever");
-    message = await User.populate(message, {
+    message = await message.populate("receiver"); // Fixed typo
+    message = await LgUser.populate(message, { // Changed to LgUser
       path: "chat.users",
-      select: "name email",
+      select: "lgname lggmail", // Updated fields
     });
 
     await Chat.findByIdAndUpdate(req.body.chatId, { latestMessage: message });
@@ -99,7 +99,7 @@ export const updateMessage = expressAsyncHandler(async (req, res) => {
       throw new Error("Message not found");
     }
 
-    if (message.sender.toString() !== req.user._id.toString()) {
+    if (message.sender.toString() !== req.user.userId.toString()) { // Updated to userId
       res.status(403);
       throw new Error("You can only update your own messages");
     }
@@ -110,8 +110,8 @@ export const updateMessage = expressAsyncHandler(async (req, res) => {
     await message.save();
 
     const updatedMessage = await Message.findById(messageId)
-      .populate("sender", "name email")
-      .populate("reciever")
+      .populate("sender", "lgname lggmail") // Updated fields
+      .populate("receiver") // Fixed typo
       .populate("chat");
 
     res.json(updatedMessage);
@@ -131,7 +131,7 @@ export const deleteMessages = expressAsyncHandler(async (req, res) => {
       throw new Error("Chat not found");
     }
 
-    if (!chat.users.includes(req.user._id)) {
+    if (!chat.users.includes(req.user.userId)) { // Updated to userId
       res.status(403);
       throw new Error("You are not a participant in this chat");
     }
@@ -156,7 +156,7 @@ export const deleteMessage = expressAsyncHandler(async (req, res) => {
       throw new Error("Message not found");
     }
 
-    if (message.sender.toString() !== req.user._id.toString()) {
+    if (message.sender.toString() !== req.user.userId.toString()) { // Updated to userId
       res.status(403);
       throw new Error("You can only delete your own messages");
     }

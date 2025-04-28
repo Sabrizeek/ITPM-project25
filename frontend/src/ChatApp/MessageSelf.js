@@ -3,6 +3,7 @@ import { Button, Dropdown, Menu, Modal, Input, message } from "antd";
 import { MoreOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { myContext } from "./MainContainer";
+import { useNavigate } from "react-router-dom";
 
 function MessageSelf({ props }) {
   const [openDialog, setOpenDialog] = useState(false);
@@ -10,6 +11,7 @@ function MessageSelf({ props }) {
   const [error, setError] = useState("");
   const [displayedTimestamp, setDisplayedTimestamp] = useState(props.updatedAt || props.createdAt);
   const { refresh, setRefresh } = useContext(myContext);
+  const navigate = useNavigate();
   const userData = JSON.parse(localStorage.getItem("userData"));
 
   const validateContent = (content) => {
@@ -34,7 +36,7 @@ function MessageSelf({ props }) {
       };
 
       await axios.put(
-        `http://localhost:8080/message/${props._id}`,
+        `http://localhost:5000/api/message/${props._id}`,
         { content: newContent },
         config
       );
@@ -45,6 +47,11 @@ function MessageSelf({ props }) {
     } catch (error) {
       console.error("Error updating message:", error);
       message.error("Failed to update message");
+      if (error.response?.status === 401) {
+        localStorage.removeItem("userData");
+        navigate("/login");
+        message.error("Session expired. Please log in again.");
+      }
     }
   };
 
@@ -56,23 +63,31 @@ function MessageSelf({ props }) {
         },
       };
 
-      await axios.delete(`http://localhost:8080/message/${props._id}`, config);
+      await axios.delete(`http://localhost:5000/api/message/${props._id}`, config);
       message.success("Message deleted");
       setRefresh(!refresh);
     } catch (error) {
       console.error("Error deleting message:", error);
       message.error("Failed to delete message");
+      if (error.response?.status === 401) {
+        localStorage.removeItem("userData");
+        navigate("/login");
+        message.error("Session expired. Please log in again.");
+      }
     }
   };
 
   const menu = (
     <Menu>
-      <Menu.Item key="update" onClick={() => setOpenDialog(true)}>Update</Menu.Item>
-      <Menu.Item key="delete" onClick={handleDeleteClick}>Delete</Menu.Item>
+      <Menu.Item key="update" onClick={() => setOpenDialog(true)}>
+        Update
+      </Menu.Item>
+      <Menu.Item key="delete" onClick={handleDeleteClick}>
+        Delete
+      </Menu.Item>
     </Menu>
   );
 
-  // Format the timestamp to show both date and time
   const formatTimestamp = (timestamp) => {
     return new Date(timestamp).toLocaleString("en-US", {
       month: "short",

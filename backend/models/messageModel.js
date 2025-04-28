@@ -1,18 +1,18 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const messageSchema = new mongoose.Schema(
   {
     sender: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "RegisterModel",
     },
     content: {
       type: String,
       trim: true,
     },
-    receiver: {  // Fixed typo from "reciever" to "receiver"
+    receiver: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "RegisterModel",
     },
     chat: {
       type: mongoose.Schema.Types.ObjectId,

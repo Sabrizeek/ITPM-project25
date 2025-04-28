@@ -12,8 +12,8 @@ import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.route("/").post(authMiddleware, accessChat);
-router.route("/").get(authMiddleware, fetchChats);
+router.route("/c").post(authMiddleware, accessChat);
+router.route("/c").get(authMiddleware, fetchChats);
 router.route("/createGroup").post(authMiddleware, createGroupChat);
 router.route("/fetchGroups").get(authMiddleware, fetchGroups);
 router.route("/groupExit").put(authMiddleware, groupExit);

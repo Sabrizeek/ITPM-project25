@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import "./Register.css";
 import Nav from "../Nav/NavLogin";
 import { useNavigate } from "react-router-dom";
-// import axios from "axios";
-import axios from "../../api/axios"; // Adjust path as needed
+import axios from "axios";
 
 function Register() {
   const navigate = useNavigate();
@@ -32,12 +31,14 @@ function Register() {
       }
     }
 
-    if (name === "lgage" && (isNaN(value) || value < 0)) {
-      setPopupMessage({ message: "Age must be a positive number!", type: "error" });
-      return;
+    if (name === "lgage") {
+      if (value && (isNaN(value) || value <= 0)) {
+        setPopupMessage({ message: "Age must be a positive number!", type: "error" });
+        return;
+      }
     }
 
-    if (name === "lgname" && value !== "" && !/^[A-Za-z\s]+$/.test(value)) {
+    if (name === "lgname" && value && !/^[A-Za-z\s]+$/.test(value)) {
       setPopupMessage({ message: "Name should not contain special characters or numbers!", type: "error" });
       return;
     }
@@ -54,6 +55,11 @@ function Register() {
       return;
     }
 
+    if (user.lgnumber.length !== 10) {
+      setPopupMessage({ message: "Phone number must be exactly 10 digits!", type: "error" });
+      return;
+    }
+
     try {
       const res = await axios.post("http://localhost:5000/api/auth/register", {
         lgname: user.lgname,
@@ -65,9 +71,19 @@ function Register() {
       });
 
       if (res.data.status === "ok") {
+        // Store user data in localStorage
+        localStorage.setItem(
+          "userData",
+          JSON.stringify({
+            _id: res.data.user.id,
+            lgname: res.data.user.lgname,
+            lggmail: res.data.user.lggmail,
+            token: res.data.token,
+          })
+        );
         setPopupMessage({ message: "Registration successful!", type: "success" });
         setTimeout(() => {
-          navigate("/login");
+          navigate("/app/mainhome"); // Navigate to chat interface
         }, 1500);
       } else {
         setPopupMessage({ message: res.data.error || "Registration failed!", type: "error" });
