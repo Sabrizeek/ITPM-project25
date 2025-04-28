@@ -1,0 +1,130 @@
+body {
+    background-color: #f8fafc;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+  }
+  
+  .register-form {
+    background-color: #fff;
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+    box-sizing: border-box;
+  }
+  
+  .register-form h1 {
+    margin-bottom: 24px;
+    font-size: 26px;
+    font-weight: bold;
+    color: #111827;
+  }
+  
+  .register-form input,
+  .register-form textarea {
+    width: 100%;
+    padding: 14px;
+    margin: 10px 0;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 15px;
+    box-sizing: border-box;
+  }
+  
+  .register-form textarea {
+    resize: none;
+    height: 90px;
+  }
+  
+  .register-form button {
+    width: 100%;
+    padding: 14px;
+    background-color: #2563eb;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 17px;
+    cursor: pointer;
+    margin-top: 15px;
+  }
+  
+  .register-form button:hover {
+    background-color: #1e40af;
+  }
+  
+  .register-form p {
+    margin-top: 18px;
+    font-size: 14px;
+    color: #6b7280;
+  }
+  
+  .register-form a {
+    color: #2563eb;
+    text-decoration: none;
+  }
+  
+  .register-form a:hover {
+    text-decoration: underline;
+  }
+  /* Pop-up Message Styling */
+.popup-message {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 15px 20px;
+  border-radius: 5px;
+  font-size: 16px;
+  font-weight: bold;
+  color: white;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: slideDown 0.5s ease-out;
+}
+
+/* Success Message Styling */
+.popup-message.success {
+  background-color: #4caf50; /* Green */
+}
+
+/* Error Message Styling */
+.popup-message.error {
+  background-color: #f44336; /* Red */
+}
+
+/* Animation for Pop-up Message */
+@keyframes slideDown {
+  from {
+    top: -50px;
+    opacity: 0;
+  }
+  to {
+    top: 20px;
+    opacity: 1;
+  }
+}
+
+/* Optional: Add a close button for the pop-up */
+.popup-message .close-btn {
+  margin-left: 15px;
+  color: white;
+  font-weight: bold;
+  float: right;
+  cursor: pointer;
+}
+
+.popup-message .close-btn:hover {
+  color: #ddd;
+}
