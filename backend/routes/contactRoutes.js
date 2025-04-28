@@ -1,41 +1,21 @@
 import express from "express";
-import { createContact, getContacts, getContactById, updateContact, deleteContact } from "../services/contactService.js";
+import { createContactHandler, getContactsHandler, getContactByIdHandler, updateContactHandler, deleteContactHandler } from "../controllers/contactController.js";
 
 const router = express.Router();
 
 // Create a new contact
-router.post("/", (req, res) => {
-  createContact(req, res)
-    .then((contact) => res.status(201).json(contact))
-    .catch((error) => res.status(400).json({ message: error.message }));
-});
+router.post("/", createContactHandler);
 
 // Get all contacts
-router.get("/", (req, res) => {
-  getContacts()
-    .then((contacts) => res.status(200).json(contacts))
-    .catch((error) => res.status(500).json({ message: error.message }));
-});
+router.get("/", getContactsHandler);
 
 // Get a contact by ID
-router.get("/:id", (req, res) => {
-  getContactById(req.params.id)
-    .then((contact) => res.status(200).json(contact))
-    .catch((error) => res.status(404).json({ message: error.message }));
-});
+router.get("/:id", getContactByIdHandler);
 
 // Update a contact by ID
-router.put("/:id", (req, res) => {
-  updateContact(req, res)
-    .then((contact) => res.status(200).json(contact))
-    .catch((error) => res.status(400).json({ message: error.message }));
-});
+router.put("/:id", updateContactHandler);
 
 // Delete a contact by ID
-router.delete("/:id", (req, res) => {
-  deleteContact(req.params.id)
-    .then((contact) => res.status(200).json(contact))
-    .catch((error) => res.status(404).json({ message: error.message }));
-});
+router.delete("/:id", deleteContactHandler);
 
 export default router;
