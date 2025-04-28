@@ -1,14 +1,14 @@
 import React from "react";
 import { Modal, Descriptions, Image, Button } from "antd";
 
-// Base URL for the backend
-const BACKEND_URL = "http://localhost:5000";
+// Use environment variable for backend URL
+const BACKEND_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const ContactDetailsModal = ({ open, onClose, contact }) => {
   if (!contact) return null;
 
   // Construct full image URL
-  const imageUrl = contact.imageUrl ? `${BACKEND_URL}/public${contact.imageUrl}` : null;
+  const imageUrl = contact.imageUrl ? `${BACKEND_URL}${contact.imageUrl}` : null;
   console.log("ContactDetailsModal Image URL:", imageUrl); // Debugging
 
   return (
