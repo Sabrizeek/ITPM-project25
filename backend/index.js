@@ -1,10 +1,7 @@
-// backend/index.js
-
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import mongoose from "mongoose";
-import bodyParser from "body-parser";
 import path from "path";
 import { fileURLToPath } from "url";
 
@@ -34,7 +31,6 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
-app.use(bodyParser.json());
 app.use(express.json());
 
 // ✅ Serve uploads statically
