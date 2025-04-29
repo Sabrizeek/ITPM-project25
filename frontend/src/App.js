@@ -13,7 +13,7 @@ import Admin from './Components/Admin/Admin';
 import CalendarComponent from './Components/Follow-ups/Calendar';
 import MainContainer from "./ChatApp/MainContainer";
 import ChatArea from "./ChatApp/ChatArea";
-import Users from "./ChatApp/Users"; // Removed Welcome.js import
+import Users from "./ChatApp/Users";
 
 import CreateEditContact from "./Components/Contact/CreateEditContact";
 import ContactDetailsModal from "./Components/Contact/ContactDetailsModal";
@@ -272,7 +272,7 @@ function App() {
           {/* Redirect unauthenticated users to /login */}
           <Route
             path="/"
-            element={userData ? <Navigate to="/app/mainhome" /> : <Navigate to="/login" />}
+            element={userData ? <Navigate to="/home2" /> : <Navigate to="/home2" />}
           />
           <Route path="/mainhome" element={<Home />} />
           <Route path="/home2" element={<Admin />} />
