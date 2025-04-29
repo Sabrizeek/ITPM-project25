@@ -59,7 +59,7 @@ const UserTable = ({ users, onUpdateUser, onDeleteUser }) => {
             Update
           </Button>
           <Button
-            type="danger"
+            className="custom-delete-button"
             onClick={() => onDeleteUser(record._id)}
             disabled={record.lggmail === 'admin@gmail.com'}
           >

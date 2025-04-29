@@ -29,6 +29,28 @@
   background-color: #f4f4f4;
 }
 
+/* Styling for Delete button with custom class */
+.custom-delete-button {
+  background-color: #e74c3c !important;
+  color: white !important;
+  border: none !important;
+}
+
+.custom-delete-button:hover {
+  background-color: #c0392b !important;
+}
+
+/* Styling for Yes, Delete button in modal */
+.ant-btn.yes-delete-button {
+  background-color: #e74c3c !important;
+  color: white !important;
+  border: none !important;
+}
+
+.ant-btn.yes-delete-button:hover {
+  background-color: #c0392b !important;
+}
+
 /* Adjust for smaller screens */
 @media (max-width: 768px) {
   .ant-table th,

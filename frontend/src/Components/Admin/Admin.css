@@ -73,6 +73,17 @@ button:hover {
   background-color: #27ae60;
 }
 
+/* Custom styling for Yes, Delete button in modal */
+button.yes-delete-button {
+  background-color: #e74c3c !important;
+  color: white !important;
+  border: none !important;
+}
+
+button.yes-delete-button:hover {
+  background-color: #c0392b !important;
+}
+
 /* Modal Styling */
 .modal {
   position: fixed;

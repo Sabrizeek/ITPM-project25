@@ -266,7 +266,7 @@ const Admin = () => {
         <div className="modal">
           <div className="modal-content">
             <p>Are you sure you want to delete this user?</p>
-            <button onClick={handleDeleteUser}>Yes, Delete</button>
+            <button className="yes-delete-button" onClick={handleDeleteUser}>Yes, Delete</button>
             <button onClick={() => setDeleteConfirmation(null)}>Cancel</button>
           </div>
         </div>
