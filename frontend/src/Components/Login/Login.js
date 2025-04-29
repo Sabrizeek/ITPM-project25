@@ -34,7 +34,7 @@ function Login() {
           })
         );
         alert("Login Successful");
-        navigate("/app/mainhome"); // Navigate to chat interface
+        navigate("/mainhome"); // Navigate to chat interface
       } else {
         setError(res.data.error || "Invalid Credentials");
       }
