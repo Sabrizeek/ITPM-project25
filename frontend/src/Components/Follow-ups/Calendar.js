@@ -1,91 +1,25 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { Calendar, Button, Modal, Table, Tag, Input, notification } from 'antd';
+import React, { useState } from 'react';
+import { Calendar, Button, Modal, Table, Tag, Input } from 'antd';
 import moment from 'moment-timezone';
-import { fetchEvents, deleteEvent, updateEvent } from '../api';
+import { deleteEvent, updateEvent } from '../api';
 import AddEvent from './AddEvent';
 import UpdateEvent from './UpdateEvent';
 
 const { Search } = Input;
 
-const CalendarComponent = () => {
-  const [events, setEvents] = useState([]);
-  const [filteredEvents, setFilteredEvents] = useState([]);
+const CalendarComponent = ({ events, loadEvents }) => {
+  const [filteredEvents, setFilteredEvents] = useState(events);
   const [agendaVisible, setAgendaVisible] = useState(false);
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [updateModalVisible, setUpdateModalVisible] = useState(false);
-  const reminderTimeouts = useRef({});
 
-  useEffect(() => {
-    loadEvents();
-    return () => {
-      Object.values(reminderTimeouts.current).forEach(clearTimeout);
-    };
-  }, []);
-
-  const scheduleReminder = (event) => {
-    if (!event.reminder) {
-      console.log(`No reminder set for ${event.title}`);
-      return;
-    }
-    const startTime = moment.tz(event.start, 'Asia/Colombo');
-    const reminderTime = startTime.clone().subtract(event.reminder, 'minutes');
-    const now = moment.tz('Asia/Colombo');
-    const timeUntilReminder = reminderTime.diff(now);
-
-    console.log(`Current Local Time: ${now.format('YYYY-MM-DD HH:mm:ss')} (Asia/Colombo)`);
-    console.log(`Event: ${event.title}`);
-    console.log(`Start Time: ${startTime.format('YYYY-MM-DD HH:mm:ss')} (Asia/Colombo)`);
-    console.log(`Reminder Time: ${reminderTime.format('YYYY-MM-DD HH:mm:ss')} (Asia/Colombo)`);
-    console.log(`Time Until Reminder: ${timeUntilReminder}ms (${Math.round(timeUntilReminder / 1000 / 60)} minutes)`);
-
-    if (timeUntilReminder > 0) {
-      if (reminderTimeouts.current[event._id]) {
-        clearTimeout(reminderTimeouts.current[event._id]);
-      }
-      reminderTimeouts.current[event._id] = setTimeout(() => {
-        notification.success({
-          message: 'Event Reminder',
-          description: `${event.title} starts in ${event.reminder} minutes at ${startTime.format('YYYY-MM-DD HH:mm')} (Sri Lanka Time)`,
-          placement: 'topRight',
-          duration: 5,
-          style: {
-            backgroundColor: '#e6ffe6',
-            border: '1px solid #99e699',
-            borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-          },
-        });
-        console.log(`Reminder triggered for ${event.title} at ${moment.tz('Asia/Colombo').format('YYYY-MM-DD HH:mm:ss')} (Asia/Colombo)`);
-        delete reminderTimeouts.current[event._id];
-      }, timeUntilReminder);
-    } else {
-      console.log(`Reminder for ${event.title} skipped: Already past due by ${-timeUntilReminder}ms`);
-    }
-  };
-
-  const loadEvents = async () => {
-    try {
-      const data = await fetchEvents();
-      const formattedEvents = data.map(event => ({
-        ...event,
-        start: moment.tz(event.start, 'Asia/Colombo'),
-        end: moment.tz(event.end, 'Asia/Colombo')
-      }));
-      setEvents(formattedEvents);
-      setFilteredEvents(formattedEvents);
-      formattedEvents.forEach(event => scheduleReminder(event));
-    } catch (error) {
-      console.error('Error loading events:', error);
-    }
-  };
+  React.useEffect(() => {
+    setFilteredEvents(events);
+  }, [events]);
 
   const handleDelete = async (id) => {
     try {
-      if (reminderTimeouts.current[id]) {
-        clearTimeout(reminderTimeouts.current[id]);
-        delete reminderTimeouts.current[id];
-      }
       await deleteEvent(id);
       loadEvents();
     } catch (error) {
