@@ -1,43 +1,46 @@
-import React, { useState } from 'react';
-import './Login.css';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import Nav from '../Nav/NavLogin';
+import React, { useState } from "react";
+import "./Login.css";
+import { useNavigate } from "react-router-dom";
+import Nav from "../Nav/NavLogin";
+import axios from "axios"; // Use direct axios import
 
 function Login() {
-  const history = useNavigate();
+  const navigate = useNavigate();
   const [user, setUser] = useState({
-    lggmail: '',
-    password: '',
+    lggmail: "",
+    password: "",
   });
+  const [error, setError] = useState("");
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setUser((prevUser) => ({ ...prevUser, [name]: value }));
+    setError("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Sending data to backend:", user); // Debugging
-
     try {
-      const res = await axios.post("/login", user);
-      console.log("Backend response:", res.data); // Debugging
-      if (res.data.status === 'ok') {
-        alert('Login Successful');
-  
-        // Redirect based on the backend response
-        if (res.data.redirectTo === "/home2") {
-          history('/home2'); // Redirect to /home2 for the specific user
-        } else {
-          history('/mainhome'); // Redirect to /mainhome for all other users
-        }
+      const res = await axios.post("http://localhost:5000/api/auth/login", user);
+      if (res.data.status === "ok") {
+        // Store user data in localStorage
+        localStorage.setItem(
+          "userData",
+          JSON.stringify({
+            _id: res.data.user.id,
+            lgname: res.data.user.lgname,
+            lggmail: res.data.user.lggmail,
+            token: res.data.token,
+          })
+        );
+        alert("Login Successful");
+        navigate("/mainhome"); // Navigate to chat interface
       } else {
-        alert('Invalid Credentials');
+        setError(res.data.error || "Invalid Credentials");
       }
     } catch (err) {
-      console.error("Login error:", err.response?.data || err.message); // Debugging
-      alert('Login Failed. Please check your credentials and try again.');
+      console.error("Login error:", err.response?.data || err.message);
+      setError(err.response?.data?.error || "Login Failed. Please try again.");
     }
   };
 
@@ -45,6 +48,7 @@ function Login() {
     <>
       <Nav />
       <div className="login-container">
+        {error && <div className="error-message">{error}</div>}
         <form className="login-form" onSubmit={handleSubmit}>
           <h1>Sign in to your account</h1>
           <input

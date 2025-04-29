@@ -1,115 +1,161 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axios from '../../api/axios';
 import UserTable from './UserTable';
-import './Admin.css';
-import Nav from '../Nav/NavAdmin.js';
+import Nav from '../Nav/NavAdmin';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
+import './Admin.css';
 
 const Admin = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [userToUpdate, setUserToUpdate] = useState(null);
-  const [userDetails, setUserDetails] = useState({ lgname: '', lggmail: '', lgage: '', lgnumber: '', lgaddress: '' });
-  const [updateSuccess, setUpdateSuccess] = useState(false);
-  const [deleteSuccess, setDeleteSuccess] = useState(false);
-  const [deleteConfirmation, setDeleteConfirmation] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortOrder, setSortOrder] = useState('');
+  const [userToUpdate, setUserToUpdate] = useState(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState(null);
+  const [formData, setFormData] = useState({
+    lgname: '',
+    lggmail: '',
+    lgage: '',
+    lgnumber: '',
+    lgaddress: ''
+  });
+  const [message, setMessage] = useState('');
+  const [retryCount, setRetryCount] = useState(0);
+  const maxRetries = 3;
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  const fetchUsers = async () => {
-    try {
-      const response = await axios.get('http://localhost:4000/lguser/allusers');
-      setUsers(response.data.users);
-      setError(null);
-    } catch (err) {
-      setError('Error fetching users');
+  const fetchUsers = async (isRetry = false) => {
+    if (isRetry) {
+      setRetryCount(prev => prev + 1);
     }
-    setLoading(false);
+
+    try {
+      const userData = JSON.parse(localStorage.getItem('userData'));
+      const token = userData?.token;
+
+      if (!token) {
+        throw new Error('No authentication token found. Please log in again.');
+      }
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const response = await axios.get('/api/auth/allusers', config);
+      setUsers(response.data.users || []);
+      setMessage('');
+      setRetryCount(0);
+    } catch (err) {
+      console.error('Error fetching users:', err);
+
+      let errorMessage = 'Error fetching users. ';
+      if (err.response) {
+        errorMessage += `Server responded with status ${err.response.status}: ${err.response.data.message || 'Unknown error'}`;
+      } else if (err.request) {
+        errorMessage += 'No response from server.';
+      } else {
+        errorMessage += err.message;
+      }
+
+      setMessage(errorMessage);
+
+      if (retryCount < maxRetries && !isRetry) {
+        setTimeout(() => {
+          fetchUsers(true);
+        }, 3000);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleUpdateUser = async (userId) => {
+  const handleUpdateUser = async (e) => {
+    e.preventDefault();
     try {
-      await axios.put(`http://localhost:4000/lguser/updateuser/${userId}`, userDetails);
+      const userData = JSON.parse(localStorage.getItem('userData'));
+      const token = userData?.token;
+
+      if (!token) {
+        throw new Error('No authentication token found. Please log in again.');
+      }
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      await axios.put(`/api/auth/updateuser/${userToUpdate}`, formData, config);
       setUserToUpdate(null);
-      setUserDetails({ lgname: '', lggmail: '', lgage: '', lgnumber: '', lgaddress: '' });
+      setFormData({ lgname: '', lggmail: '', lgage: '', lgnumber: '', lgaddress: '' });
       fetchUsers();
-      setUpdateSuccess(true);
-      setTimeout(() => setUpdateSuccess(false), 3000);
+      setMessage('User updated successfully');
     } catch (err) {
-      setError('Error updating user');
+      console.error('Error updating user:', err);
+      setMessage('Error updating user: ' + (err.response?.data.message || err.message));
     }
   };
 
-  const handleDeleteUser = async (userId) => {
+  const handleDeleteUser = async () => {
     try {
-      await axios.delete(`http://localhost:4000/lguser/deleteuser/${userId}`);
+      const userData = JSON.parse(localStorage.getItem('userData'));
+      const token = userData?.token;
+
+      if (!token) {
+        throw new Error('No authentication token found. Please log in again.');
+      }
+
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      await axios.delete(`/api/auth/deleteuser/${deleteConfirmation}`, config);
       fetchUsers();
       setDeleteConfirmation(null);
-      setDeleteSuccess(true);
-      setTimeout(() => setDeleteSuccess(false), 3000);
+      setMessage('User deleted successfully');
     } catch (err) {
-      setError('Error deleting user');
+      console.error('Error deleting user:', err);
+      setMessage('Error deleting user: ' + (err.response?.data.message || err.message));
     }
-  };
-  
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-
-    // Validation logic
-    if (name === 'lgnumber' && value.length !== 10) {
-      setError('Mobile number must be exactly 10 digits');
-      return;
-    }
-
-    if (name === 'lgage' && (isNaN(value) || value < 0)) {
-      setError('Age must be a positive number');
-      return;
-    }
-
-    if (name === 'lgname' && !/^[a-zA-Z\s]*$/.test(value)) {
-      setError('Name cannot contain special characters');
-      return;
-    }
-
-    setUserDetails({ ...userDetails, [name]: value });
-    setError(null); // Clear any previous errors
   };
 
   const handleDownloadPDF = () => {
-    const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text('User List', 10, 10);
+    try {
+      const doc = new jsPDF();
+      doc.setFontSize(18);
+      doc.text('User List', 14, 20);
 
-    // Filter out the admin user
-    const usersWithoutAdmin = sortedUsers.filter(user => user.lggmail !== 'pamod@gmail.com');
+      const usersWithoutAdmin = sortedUsers.filter(user => user.lggmail !== 'admin@gmail.com');
+      const columns = ['Name', 'Email', 'Age', 'Mobile', 'Address'];
+      const data = usersWithoutAdmin.map(user => [
+        user.lgname,
+        user.lggmail,
+        user.lgage.toString(),
+        user.lgnumber.toString(),
+        user.lgaddress,
+      ]);
 
-    const columns = ['Name', 'Email', 'Age', 'Mobile', 'Address'];
-    const rows = usersWithoutAdmin.map(user => [
-      user.lgname.toString(),
-      user.lggmail.toString(),
-      user.lgage.toString(),
-      user.lgnumber.toString(),
-      user.lgaddress.toString(),
-    ]);
+      autoTable(doc, {
+        startY: 30,
+        head: [columns],
+        body: data,
+        theme: 'striped',
+        headStyles: { fillColor: [22, 160, 133], textColor: [255, 255, 255] },
+      });
 
-    let startY = 20;
-    doc.setFontSize(10);
-    doc.setFont(undefined, 'bold');
-    columns.forEach((col, index) => doc.text(col, 11 + index * 40, startY));
-    doc.setFont(undefined, 'normal');
-    rows.forEach((row, rowIndex) => {
-      startY += 10;
-      row.forEach((cell, colIndex) => doc.text(cell, 10 + colIndex * 40, startY));
-    });
-
-    doc.save('users.pdf');
+      doc.save('users.pdf');
+    } catch (err) {
+      console.error('PDF generation failed', err);
+      setMessage('Failed to generate PDF');
+    }
   };
 
   const filteredUsers = users.filter(user =>
@@ -124,134 +170,104 @@ const Admin = () => {
   });
 
   return (
-    <div>
+    <div style={{ padding: '20px' }}>
       <Nav />
       <h2>Admin Dashboard</h2>
 
-      {loading && <p>Loading users...</p>}
-      {error && <div className="error-message">{error}</div>}
-      {updateSuccess && <div className="success-message">User updated successfully!</div>}
-      {deleteSuccess && <div className="success-message">User deleted successfully!</div>}
-      <div className="controls">
-  <input
-    type="text"
-    placeholder="Search by name or email..."
-    value={searchQuery}
-    onChange={(e) => setSearchQuery(e.target.value)}
-    className="search-bar"
-  />
+      {message && (
+        <div style={{ color: 'red', marginBottom: '10px' }}>
+          <p>{message}</p>
+          {retryCount >= maxRetries && (
+            <button onClick={() => fetchUsers(true)} style={{ marginTop: '5px' }}>
+              Retry Fetching Users
+            </button>
+          )}
+        </div>
+      )}
 
-  <select
-    value={sortOrder}
-    onChange={(e) => setSortOrder(e.target.value)}
-    className="sort-dropdown"
-  >
-    <option value="">Sort by Age</option>
-    <option value="asc">Age: Low to High</option>
-    <option value="desc">Age: High to Low</option>
-  </select>
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+        <input
+          type="text"
+          placeholder="Search by name or email..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+        <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)}>
+          <option value="">Sort by Age</option>
+          <option value="asc">Age: Low to High</option>
+          <option value="desc">Age: High to Low</option>
+        </select>
+        <button onClick={handleDownloadPDF}>Download PDF</button>
+      </div>
 
-  <button onClick={handleDownloadPDF} className="download-pdf-button">
-    Download PDF
-  </button>
-</div>
-
-      {sortedUsers.length > 0 ? (
+      {loading ? (
+        <div>Loading users...</div>
+      ) : users.length === 0 && !message ? (
+        <div>No users found.</div>
+      ) : (
         <UserTable
           users={sortedUsers}
           onUpdateUser={(user) => {
             setUserToUpdate(user._id);
-            setUserDetails(user);
+            setFormData(user);
           }}
           onDeleteUser={(userId) => setDeleteConfirmation(userId)}
         />
-      ) : (
-        <p>No users found</p>
       )}
 
       {userToUpdate && (
-        <div className="modal-overlay">
-          <div className="modal">
+        <div className="modal">
+          <div className="modal-content">
             <h3>Update User</h3>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleUpdateUser(userToUpdate);
-              }}
-            >
-              <label>
-                Name
-                <input
-                  type="text"
-                  name="lgname"
-                  value={userDetails.lgname}
-                  onChange={handleInputChange}
-                  required
-                  pattern="[a-zA-Z\s]*"
-                  title="Name cannot contain special characters"
-                />
-              </label>
-              <label>
-                Email
-                <input
-                  type="text"
-                  name="lggmail"
-                  value={userDetails.lggmail}
-                  onChange={handleInputChange}
-                  required
-                />
-              </label>
-              <label>
-                Age
-                <input
-                  type="number"
-                  name="lgage"
-                  value={userDetails.lgage}
-                  onChange={handleInputChange}
-                  required
-                  min="0"
-                  title="Age must be a positive number"
-                />
-              </label>
-              <label>
-                Mobile
-                <input
-                  type="text"
-                  name="lgnumber"
-                  value={userDetails.lgnumber}
-                  onChange={handleInputChange}
-                  required
-                  pattern="\d{10}"
-                  title="Mobile number must be exactly 10 digits"
-                />
-              </label>
-              <label>
-                Address
-                <input
-                  type="text"
-                  name="lgaddress"
-                  value={userDetails.lgaddress}
-                  onChange={handleInputChange}
-                  required
-                />
-              </label>
-              <div className="modal-buttons">
-                <button type="submit">Update</button>
-                <button type="button" onClick={() => setUserToUpdate(null)}>Cancel</button>
-              </div>
+            <form onSubmit={handleUpdateUser}>
+              <input
+                type="text"
+                placeholder="Name"
+                value={formData.lgname}
+                onChange={(e) => setFormData({ ...formData, lgname: e.target.value })}
+                required
+              />
+              <input
+                type="email"
+                placeholder="Email"
+                value={formData.lggmail}
+                onChange={(e) => setFormData({ ...formData, lggmail: e.target.value })}
+                required
+              />
+              <input
+                type="number"
+                placeholder="Age"
+                value={formData.lgage}
+                onChange={(e) => setFormData({ ...formData, lgage: e.target.value })}
+                required
+              />
+              <input
+                type="tel"
+                placeholder="Mobile"
+                value={formData.lgnumber}
+                onChange={(e) => setFormData({ ...formData, lgnumber: e.target.value })}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Address"
+                value={formData.lgaddress}
+                onChange={(e) => setFormData({ ...formData, lgaddress: e.target.value })}
+                required
+              />
+              <button type="submit">Update</button>
+              <button type="button" onClick={() => setUserToUpdate(null)}>Cancel</button>
             </form>
           </div>
         </div>
       )}
 
       {deleteConfirmation && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h3>Are you sure you want to delete this user?</h3>
-            <div className="modal-buttons">
-              <button onClick={() => handleDeleteUser(deleteConfirmation)}>Yes, Delete</button>
-              <button onClick={() => setDeleteConfirmation(null)}>Cancel</button>
-            </div>
+        <div className="modal">
+          <div className="modal-content">
+            <p>Are you sure you want to delete this user?</p>
+            <button className="yes-delete-button" onClick={handleDeleteUser}>Yes, Delete</button>
+            <button onClick={() => setDeleteConfirmation(null)}>Cancel</button>
           </div>
         </div>
       )}
