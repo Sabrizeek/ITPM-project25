@@ -34,11 +34,10 @@ function Sidebar() {
       headers: { Authorization: `Bearer ${userData.token}` },
     };
 
-    // Fetch conversations
     axios
-      .get("http://localhost:5000/api/chat/c", config)
+      .get("http://localhost:5000/api/chat/", config)
       .then((response) => {
-        console.log("Conversations fetched:", response.data);
+        // Sort conversations to show "General" chat first
         const sortedConversations = response.data.sort((a, b) => {
           if (a.chatName === "General") return -1;
           if (b.chatName === "General") return 1;
@@ -47,31 +46,23 @@ function Sidebar() {
         setConversations(sortedConversations);
       })
       .catch((error) => {
-        console.error("Error fetching conversations:", error);
         if (error.response?.status === 401) {
           localStorage.removeItem("userData");
           navigate("/login");
           message.error("Session expired. Please log in again.");
-        } else {
-          message.error("Error fetching conversations");
         }
       });
 
-    // Fetch all users for search
     axios
       .get("http://localhost:5000/api/auth/allusers", config)
       .then((response) => {
-        console.log("All users fetched for search:", response.data.users);
         setAllUsers(response.data.users);
       })
       .catch((error) => {
-        console.error("Error fetching all users:", error);
         if (error.response?.status === 401) {
           localStorage.removeItem("userData");
           navigate("/login");
           message.error("Session expired. Please log in again.");
-        } else {
-          message.error("Error fetching users for search");
         }
       });
   }, [refresh, userData.token, navigate]);
@@ -134,7 +125,7 @@ function Sidebar() {
       </div>
       <div className="sb-search">
         <Input
-          placeholder="Search users.."
+          placeholder="Search users or groups..."
           className="search-box"
           prefix={<SearchOutlined />}
           value={searchTerm}
@@ -155,7 +146,7 @@ function Sidebar() {
                     };
                     try {
                       const { data } = await axios.post(
-                        "http://localhost:5000/api/chat/c",
+                        "http://localhost:5000/api/chat/",
                         { userId: user._id },
                         config
                       );
