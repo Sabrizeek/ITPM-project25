@@ -34,7 +34,6 @@ const Admin = () => {
     }
 
     try {
-      // Retrieve token from localStorage (assuming it's stored after login)
       const userData = JSON.parse(localStorage.getItem('userData'));
       const token = userData?.token;
 
@@ -42,7 +41,6 @@ const Admin = () => {
         throw new Error('No authentication token found. Please log in again.');
       }
 
-      // Configure the request with the Authorization header
       const config = {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -50,31 +48,26 @@ const Admin = () => {
       };
 
       const response = await axios.get('/api/auth/allusers', config);
-      setUsers(response.data.users || []); // Ensure users is an array
-      setMessage(''); // Clear any previous error message
-      setRetryCount(0); // Reset retry count on success
+      setUsers(response.data.users || []);
+      setMessage('');
+      setRetryCount(0);
     } catch (err) {
       console.error('Error fetching users:', err);
 
-      // Construct a detailed error message
       let errorMessage = 'Error fetching users. ';
       if (err.response) {
-        // Server responded with a status code outside 2xx
         errorMessage += `Server responded with status ${err.response.status}: ${err.response.data.message || 'Unknown error'}`;
       } else if (err.request) {
-        // Request was made but no response received
-        errorMessage += 'No response from server. Please check if the server is running.';
+        errorMessage += 'No response from server.';
       } else {
-        // Something else caused the error
         errorMessage += err.message;
       }
 
       setMessage(errorMessage);
 
-      // Retry logic
       if (retryCount < maxRetries && !isRetry) {
         setTimeout(() => {
-          fetchUsers(true); // Retry after 3 seconds
+          fetchUsers(true);
         }, 3000);
       }
     } finally {
