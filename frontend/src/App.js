@@ -3,7 +3,8 @@ import { Route, Routes, Navigate } from "react-router-dom";
 import { ConfigProvider, Button, Table, Input, Space, Popconfirm, message, Image, Select } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { DeleteFilled, EditFilled, EyeFilled } from "@ant-design/icons";
-import "antd/dist/reset.css";
+import 'antd/dist/reset.css';
+
 import "./App.css";
 
 import Home from './Components/Home/Home';
