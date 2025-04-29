@@ -1,0 +1,171 @@
+/* General container styling */
+div {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Full page container to fit screen */
+body, html {
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+
+/* Main container to stretch and fill space */
+div[style*="padding: 20px"] {
+  padding: 10px !important;
+  width: 100%;
+  height: calc(100vh - 60px); /* Adjust for nav height */
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* Heading */
+h2 {
+  margin-bottom: 15px;
+  color: #2c3e50;
+  font-size: 28px;
+}
+
+/* Inputs, Select, Buttons in Toolbar */
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="tel"],
+input[type="text"],
+select {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  outline: none;
+  font-size: 14px;
+  transition: border-color 0.3s;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+input:focus,
+select:focus {
+  border-color: #2ecc71;
+}
+
+/* Buttons */
+button {
+  padding: 8px 16px;
+  background-color: #2ecc71;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+  width: auto;
+}
+
+button:hover {
+  background-color: #27ae60;
+}
+
+/* Custom styling for Yes, Delete button in modal */
+button.yes-delete-button {
+  background-color: #e74c3c !important;
+  color: white !important;
+  border: none !important;
+}
+
+button.yes-delete-button:hover {
+  background-color: #c0392b !important;
+}
+
+/* Modal Styling */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 600px;
+  box-sizing: border-box;
+}
+
+/* Form Styling */
+.modal-content form input {
+  display: block;
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+/* Error message */
+div[style*="color: red"] {
+  background-color: #fdecea;
+  color: #c0392b;
+  padding: 10px;
+  border-radius: 6px;
+}
+
+/* Loading & Empty Message */
+div[style*="Loading users..."],
+div[style*="No users found."] {
+  margin-top: 20px;
+  color: #7f8c8d;
+}
+
+@media (max-width: 768px) {
+  h2 {
+    font-size: 24px;
+  }
+
+  .modal-content {
+    width: 95%;
+    padding: 20px;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="number"],
+  input[type="tel"],
+  select {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  button {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  h2 {
+    font-size: 20px;
+  }
+
+  .modal-content {
+    width: 100%;
+    padding: 15px;
+  }
+
+  button {
+    width: 100%;
+    margin-top: 10px;
+  }
+}
