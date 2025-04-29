@@ -1,4 +1,5 @@
 import React from "react";
+import Nav from '../Nav/NavHome';
 import { Modal, Descriptions, Image, Button } from "antd";
 
 // Use environment variable for backend URL

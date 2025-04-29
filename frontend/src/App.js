@@ -6,6 +6,7 @@ import { DeleteFilled, EditFilled, EyeFilled } from "@ant-design/icons";
 import "antd/dist/reset.css";
 import "./App.css";
 import "./ReminderPopup.css";
+import Nav from "./Components/Nav/NavHome";
 
 import Home from "./Components/Home/Home";
 import Register from "./Components/Register/Register";
@@ -272,6 +273,7 @@ const ContactManagement = () => {
 
   return (
     <div style={{ padding: "20px" }}>
+        <Nav />
       <h1>Contact Management</h1>
       <Space style={{ marginBottom: 16 }} wrap>
         <Button type="primary" onClick={() => showModal()}>
