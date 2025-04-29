@@ -1,3 +1,4 @@
+// src/components/MainContainer.js
 import React, { createContext, useState, useEffect } from "react";
 import "./myStyles.css";
 import Sidebar from "./Sidebar";
@@ -20,10 +21,16 @@ function MainContainer() {
   const userData = JSON.parse(localStorage.getItem("userData"));
 
   useEffect(() => {
-    if (!userData) {
+    if (!userData || !userData.token) {
+      console.log("User not authenticated, redirecting to login");
       navigate("/login");
     }
   }, [userData, navigate]);
+
+  // Render nothing or a loading state until authentication is confirmed
+  if (!userData || !userData.token) {
+    return null; // Prevent rendering until redirected
+  }
 
   return (
     <div
