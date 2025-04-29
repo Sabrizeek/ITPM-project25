@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Route, Routes, Navigate } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { ConfigProvider, Button, Table, Input, Space, Popconfirm, message, Image, Select } from "antd";
 import { useDispatch, useSelector } from "react-redux";
 import { DeleteFilled, EditFilled, EyeFilled } from "@ant-design/icons";
-import 'antd/dist/reset.css';
-
+import "antd/dist/reset.css";
 import "./App.css";
 
 import Home from './Components/Home/Home';
@@ -25,7 +24,7 @@ import { autoTable } from "jspdf-autotable";
 const { Search } = Input;
 const { Option } = Select;
 
-// Set backend URL
+// ✅ Set backend URL
 const BACKEND_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const ContactManagement = () => {
@@ -264,17 +263,12 @@ const ContactManagement = () => {
 function App() {
   const dispatch = useDispatch();
   const lightTheme = useSelector((state) => state.themeKey);
-  const userData = JSON.parse(localStorage.getItem("userData"));
 
   return (
     <ConfigProvider theme={{ token: { colorPrimary: '#00b96b' } }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto' }} className={"App" + (lightTheme ? "" : "-dark")}>
         <Routes>
-          {/* Redirect unauthenticated users to /login */}
-          <Route
-            path="/"
-            element={userData ? <Navigate to="/app/mainhome" /> : <Navigate to="/login" />}
-          />
+          <Route path="/" element={<Home />} />
           <Route path="/mainhome" element={<Home />} />
           <Route path="/home2" element={<Admin />} />
           <Route path="/register" element={<Register />} />
@@ -283,8 +277,8 @@ function App() {
           <Route path="/contacts" element={<ContactManagement />} />
 
           {/* Chat routes */}
-          <Route path="/app" element={<MainContainer />}>
-            <Route path="mainhome" element={<Users />} />
+          <Route path="app" element={<MainContainer />}>
+            <Route path="welcome" element={<Users />} />
             <Route path="chat/:_id" element={<ChatArea />} />
           </Route>
 
