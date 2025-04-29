@@ -15,7 +15,7 @@ VADER for sentiment analysis
 
 Setup
 
-Clone the repo: git clone https://github.com/<your-username>/connectvault.git
+Clone the repo: https://github.com/Sabrizeek/ITPM-project25.git
 Install dependencies: npm install
 Set up .env: REACT_APP_API_URL=http://localhost:5000
 Run: npm start
