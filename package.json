@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "nodemon backend/index.js"
+    "start": "node api.js && nodemon backend/index.js"
   },
   "keywords": [],
   "author": "",
