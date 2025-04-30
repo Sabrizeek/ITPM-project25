@@ -195,6 +195,7 @@ const CalendarComponent = ({ events, loadEvents }) => {
       }}
     >
       <Nav />
+      <br/> <br/> <br/> <br/>
       <div
         style={{
           display: "flex",
