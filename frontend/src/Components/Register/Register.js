@@ -83,7 +83,7 @@ function Register() {
         );
         setPopupMessage({ message: "Registration successful!", type: "success" });
         setTimeout(() => {
-          navigate("/app/mainhome"); // Navigate to chat interface
+          navigate("/mainhome"); // Navigate to chat interface
         }, 1500);
       } else {
         setPopupMessage({ message: res.data.error || "Registration failed!", type: "error" });
@@ -96,6 +96,7 @@ function Register() {
   return (
     <>
       <Nav />
+      <br/> <br/> <br/>
       <div className="register-container">
         {popupMessage.message && (
           <div className={`popup-message ${popupMessage.type}`}>

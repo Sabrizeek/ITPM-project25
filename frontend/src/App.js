@@ -274,7 +274,8 @@ const ContactManagement = () => {
   return (
     <div style={{ padding: "20px" }}>
         <Nav />
-      <h1>Contact Management</h1>
+        <br/> <br/> <br/> <br/>
+      
       <Space style={{ marginBottom: 16 }} wrap>
         <Button type="primary" onClick={() => showModal()}>
           Create Contact
@@ -494,7 +495,7 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={userData ? <Navigate to="/app/mainhome" /> : <Navigate to="/login" />}
+            element={userData ? <Navigate to="/login" /> : <Navigate to="/login" />}
           />
           <Route path="/mainhome" element={<Home />} />
           <Route path="/home2" element={<Admin />} />
