@@ -1,6 +1,8 @@
 import React, { createContext, useState, useEffect } from "react";
 import "./myStyles.css";
+// import "./nav.css";
 import Sidebar from "./Sidebar";
+import NavHome from "../Components/Nav/NavHome";
 import { Outlet, useNavigate } from "react-router-dom";
 
 export const myContext = createContext();
@@ -10,7 +12,7 @@ const emotionBackgrounds = {
   Sad: "#87ceeb",
   Angry: "#ff6347",
   Love: "#ffb6c1",
-  Neutral: "#f0f2f5",
+  Neutral: "#f4f2f5",
 };
 
 function MainContainer() {
@@ -31,19 +33,30 @@ function MainContainer() {
       style={{
         backgroundColor: emotionBackgrounds[dominantEmotion],
         transition: "background-color 0.5s ease",
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+        width: "100vw",
+        overflow: "hidden",
       }}
     >
-      <myContext.Provider
-        value={{
-          refresh,
-          setRefresh,
-          dominantEmotion,
-          setDominantEmotion,
-        }}
-      >
-        <Sidebar />
-        <Outlet />
-      </myContext.Provider>
+      <NavHome />
+      <br/> <br/> <br/> <br/>
+      <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+        <myContext.Provider
+          value={{
+            refresh,
+            setRefresh,
+            dominantEmotion,
+            setDominantEmotion,
+          }}
+        >
+          <Sidebar />
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
+            <Outlet />
+          </div>
+        </myContext.Provider>
+      </div>
     </div>
   );
 }
