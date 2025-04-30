@@ -17,7 +17,7 @@ function Nav() {
       <ul className="navbar-links">
         <li><Link to="/mainhome" className="nav-link">Home</Link></li>
         <li><Link to="/contacts" className="nav-link">Contacts</Link></li>
-        <li><Link to="/app/mainhome" className="nav-link">Live Chats</Link></li>
+        <li><Link to="/app/mainhome" className="nav-link">Chat-Area</Link></li>
         <li><Link to="/Calendar" className="nav-link">Follow-Ups</Link></li>
         <li>
           <button onClick={handleLogout} className="logout-button">Logout</button>

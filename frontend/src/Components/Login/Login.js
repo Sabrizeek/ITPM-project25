@@ -34,7 +34,12 @@ function Login() {
           })
         );
         alert("Login Successful");
-        navigate("/mainhome"); // Navigate to chat interface
+        // Check if the user is admin
+        if (res.data.user.lggmail === "admin@gmail.com") {
+          navigate("/home2"); // Navigate to Admin dashboard
+        } else {
+          navigate("/mainhome"); // Navigate to homepage
+        }
       } else {
         setError(res.data.error || "Invalid Credentials");
       }
@@ -47,9 +52,15 @@ function Login() {
   return (
     <>
       <Nav />
+       <br/> <br/> 
       <div className="login-container">
-        {error && <div className="error-message">{error}</div>}
-        <form className="login-form" onSubmit={handleSubmit}>
+        {error && (
+          <div className="error-popup">
+            <span>{error}</span>
+            <button className="error-close" onClick={() => setError("")}>×</button>
+          </div>
+        )}
+        <div className="login-form">
           <h1>Sign in to your account</h1>
           <input
             type="email"
@@ -67,11 +78,11 @@ function Login() {
             placeholder="Password"
             required
           />
-          <button type="submit">Sign in</button>
+          <button type="submit" onClick={handleSubmit}>Sign in</button>
           <p>
             Don't have an account? <a href="/register">Register here</a>
           </p>
-        </form>
+        </div>
       </div>
     </>
   );

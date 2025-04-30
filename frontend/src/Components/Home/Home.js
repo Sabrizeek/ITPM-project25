@@ -1,12 +1,12 @@
 import React from 'react';
-import Nav from '../Nav/NavHome'; // Your existing Nav
+import NavHome from '../Nav/NavHome'; // Your existing Nav
 import './Home.css'; // Make sure you create Home.css
 
 function Home() {
   return (
     <div>
-      <Nav />
-
+      <NavHome />
+      
       <div className="home-container">
         <header className="hero-section">
           <h1>Welcome to ConnectVault</h1>
